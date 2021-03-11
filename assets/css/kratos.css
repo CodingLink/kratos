@@ -202,7 +202,7 @@ button:focus {
 
 .k-nav .navbar-brand img {
   max-width: 168px;
-  max-height: 40px;
+  max-height: 35px;
 }
 
 .k-nav .navbar-brand h1 {
@@ -1494,6 +1494,7 @@ button:focus {
 
   .k-main .details .toolbar .motto {
     padding-bottom: 5px;
+    min-height: 30px;
   }
 
   .k-main .details .toolbar .share .btn {
