@@ -180,7 +180,7 @@ add_filter('style_loader_src', function ($href) {
 function get_https_avatar($avatar)
 {
     if (kratos_option('g_gravatar', false)) {
-        $cdn = "gravatar.loli.net";
+        $cdn = "sdn.geekzu.org";
     } else {
         $cdn = "cn.gravatar.com";
     }
