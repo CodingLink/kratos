@@ -1,11 +1,11 @@
 /*!
  * Kratos
- * Seaton Jiang <seaton@vtrois.com>
+ * Seaton Jiang <seatonjiang@vtrois.com>
  */
 (function () {
   "use strict";
 
-  var KRATOS_VERSION = "3.2.8";
+  var KRATOS_VERSION = "3.3.3";
 
   var navbarConfig = function () {
     $("#navbutton").on("click", function () {

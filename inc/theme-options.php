@@ -1,21 +1,23 @@
 <?php
 /**
  * 主题选项
- * @author Seaton Jiang <seaton@vtrois.com>
+ * @author Seaton Jiang <seatonjiang@vtrois.com>
  * @license MIT License
- * @version 2021.03.11
+ * @version 2021.06.25
  */
 
 function getrobots()
 {
     $site_url = parse_url(site_url());
+    $web_url = get_bloginfo('url');
     $path = (!empty($site_url['path'])) ? $site_url['path'] : '';
 
     $robots = "User-agent: *\n\n";
     $robots .= "Disallow: $path/wp-admin/\n";
     $robots .= "Disallow: $path/wp-includes/\n";
     $robots .= "Disallow: $path/wp-content/plugins/\n";
-    $robots .= "Disallow: $path/wp-content/themes/\n";
+    $robots .= "Disallow: $path/wp-content/themes/\n\n";
+    $robots .= "Sitemap: $web_url/wp-sitemap.xml\n";
 
     return $robots;
 }
@@ -52,6 +54,10 @@ function kratos_options()
     $seorobots = '<a href="' . home_url() . '/robots.txt" target="_blank">robots.txt</a>';
     $seoreading = '<a href="' . admin_url('options-reading.php') . '" target="_blank">' . __('设置-阅读-对搜索引擎的可见性', 'kratos') . '</a>';
 
+    $imgxconsole = '<a href="https://console.volcengine.com/iam/keymanage/" target="_blank">火山引擎控制台</a>';
+    $imgxtmp = '<a href="https://console.volcengine.com/imagex/image_template/" target="_blank">图片处理配置</a>';
+    $imgxsid = '<a href="https://console.volcengine.com/imagex/service_manage/" target="_blank">图片服务管理</a>';
+    
     $cc_array = array(
         'one' => __('知识共享署名 4.0 国际许可协议', 'kratos'),
         'two' => __('知识共享署名-非商业性使用 4.0 国际许可协议', 'kratos'),
@@ -59,6 +65,12 @@ function kratos_options()
         'four' => __('知识共享署名-非商业性使用-禁止演绎 4.0 国际许可协议', 'kratos'),
         'five' => __('知识共享署名-相同方式共享 4.0 国际许可协议', 'kratos'),
         'six' => __('知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议', 'kratos'),
+    );
+
+    $region_array = array(
+        'cn-north-1' => __('国内', 'kratos'),
+        'us-east-1' => __('美东', 'kratos'),
+        'ap-singapore-1' => __('新加坡', 'kratos')
     );
 
 	$top_array = array(
@@ -108,6 +120,14 @@ function kratos_options()
         'desc' => __('开启小工具个人简介头像进入后台功能', 'kratos'),
         'std' => '1',
         'id' => 'g_login',
+        'type' => 'checkbox',
+    );
+
+    $options[] = array(
+        'name' => __('侧边栏随动', 'kratos'),
+        'desc' => __('开启小工具侧边栏随动功能', 'kratos'),
+        'std' => '0',
+        'id' => 'g_sticky',
         'type' => 'checkbox',
     );
 
@@ -208,12 +228,70 @@ function kratos_options()
         'name' => __('AccessKey', 'kratos'),
         'id' => 'g_cos_accesskey',
         'class' => 'hidden',
-        'type' => 'text',
+        'type' => 'password',
     );
 
     $options[] = array(
         'name' => __('SecretKey', 'kratos'),
         'id' => 'g_cos_secretkey',
+        'class' => 'hidden',
+        'type' => 'password',
+    );
+
+    $options[] = array(
+        'name' => __('火山引擎服务', 'kratos'),
+        'desc' => __('是否开启火山引擎 ImageX 图片服务', 'kratos'),
+        'id' => 'g_imgx',
+        'std' => '0',
+        'type' => 'checkbox',
+    );
+
+    $options[] = array(
+        'name' => __('加速地域', 'kratos'),
+        'id' => 'g_imgx_region',
+        'std' => 'cn-north-1',
+        'type' => 'select',
+        'class' => 'hidden',
+        'options' => $region_array,
+    );
+
+    $options[] = array(
+        'name' => __('服务ID', 'kratos'),
+        'id' => 'g_imgx_serviceid',
+        'desc' => __('服务ID在控制台', 'kratos') . $imgxsid . __('中获取', 'kratos'),
+        'class' => 'hidden',
+        'type' => 'text',
+    );
+
+    $options[] = array(
+        'name' => __('加速域名', 'kratos'),
+        'id' => 'g_imgx_url',
+        'desc' => __('最后不要添加 /', 'kratos'),
+        'placeholder' => __('例如：https://cdn.xxx.com', 'kratos'),
+        'class' => 'hidden',
+        'type' => 'text',
+    );
+
+    $options[] = array(
+        'name' => __('图片处理模板', 'kratos'),
+        'id' => 'g_imgx_tmp',
+        'desc' => __('模板配置代码在控制台', 'kratos') . $imgxtmp . __('中获取', 'kratos'),
+        'class' => 'hidden',
+        'type' => 'text',
+    );
+
+    $options[] = array(
+        'name' => __('AccessKey', 'kratos'),
+        'id' => 'g_imgx_accesskey',
+        'desc' => __('AccessKey 在', 'kratos') . $imgxconsole . __('中获取', 'kratos'),
+        'class' => 'hidden',
+        'type' => 'password',
+    );
+
+    $options[] = array(
+        'name' => __('SecretKey', 'kratos'),
+        'id' => 'g_imgx_secretkey',
+        'desc' => __('SecretKey 在', 'kratos') . $imgxconsole . __('中获取', 'kratos'),
         'class' => 'hidden',
         'type' => 'password',
     );
@@ -361,6 +439,15 @@ function kratos_options()
     );
 
     $options[] = array(
+        'name' => __('目录特色图片', 'kratos'),
+        'desc' => __('针对分类目录单独设置默认特色图片', 'kratos'),
+        'std' => '1',
+        'class' => 'hidden',
+        'id' => 'essay_feature_img_usable',
+        'type' => 'checkbox',
+    );
+
+    $options[] = array(
         'name' => __('默认特色图', 'kratos'),
         'desc' => __('当文章中没有图片并且没有设置特色图时在首页显示', 'kratos'),
         'id' => 'g_postthumbnail',
@@ -368,6 +455,26 @@ function kratos_options()
         'std' => ASSET_PATH . '/assets/img/default.jpg',
         'type' => 'upload',
     );
+    
+    #在这里获取所有分类的名称和id 然后加入到设置中
+    if(kratos_option('essay_feature_img_usable', true)){
+        $args=array(
+            'orderby' => 'name',
+            'order' => 'ASC',
+            #设置获取没有文章的空类
+            'hide_empty' => false
+        );
+        $categories=get_categories($args);
+        foreach($categories as $category) {
+            $options[] = array(
+                'name' => __( $category->name.'分类默认特色图片', 'kratos'),
+                'desc' => __('没有设置默认图片时，按照文章分类默认给出', 'kratos'),
+                'id' => ('essay_feature_img_'.$category->term_id),
+                'std' => ASSET_PATH . '/assets/img/default.jpg',
+                'type' => 'upload',
+            );
+        }
+    }
 
     $options[] = array(
         'name' => __('无内容图片', 'kratos'),
@@ -486,6 +593,14 @@ function kratos_options()
         'name' => __('附加功能', 'kratos'),
         'desc' => __('关闭文章自动保存、修订版本功能', 'kratos'),
         'id' => 'g_post_revision',
+        'type' => 'checkbox',
+        'std' => '1',
+    );
+
+    $options[] = array(
+        'name' => __('文章目录', 'kratos'),
+        'desc' => __('开启文章页面目录功能，将自动识别到 h3 的标题，并在侧边栏生成文章目录', 'kratos'),
+        'id' => 'g_post_toc',
         'type' => 'checkbox',
         'std' => '1',
     );
@@ -703,6 +818,19 @@ function kratos_options()
     $options[] = array(
         'id' => 's_gitee_url',
         'placeholder' => __('例如：https://gitee.com/xxxxx', 'kratos'),
+        'class' => 'hidden',
+        'type' => 'text',
+    );
+
+    $options[] = array(
+        'desc' => __('豆瓣', 'kratos'),
+        'id' => 's_douban',
+        'type' => 'checkbox',
+    );
+
+    $options[] = array(
+        'id' => 's_douban_url',
+        'placeholder' => __('例如：https://www.douban.com/people/xxxxx', 'kratos'),
         'class' => 'hidden',
         'type' => 'text',
     );

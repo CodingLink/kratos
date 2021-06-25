@@ -1,9 +1,9 @@
 <?php
 /**
  * 站点相关函数
- * @author Seaton Jiang <seaton@vtrois.com>
+ * @author Seaton Jiang <seatonjiang@vtrois.com>
  * @license MIT License
- * @version 2020.09.27
+ * @version 2021.06.25
  */
 
 // 标题配置
@@ -49,7 +49,7 @@ function keywords()
     } else {
         $keywords = single_tag_title('', false);
     }
-    return trim(strip_tags($keywords));
+    return trim(esc_attr(strip_tags($keywords)));
 }
 
 // Description 配置
@@ -77,7 +77,7 @@ function description()
             $description = kratos_option('seo_description');
         }
     }
-    return trim(strip_tags($description));
+    return trim(esc_attr(strip_tags($description)));
 }
 
 // robots.txt 配置

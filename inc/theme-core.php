@@ -1,9 +1,9 @@
 <?php
 /**
  * 核心函数
- * @author Seaton Jiang <seaton@vtrois.com>
+ * @author Seaton Jiang <seatonjiang@vtrois.com>
  * @license MIT License
- * @version 2021.03.11
+ * @version 2021.06.25
  */
 
 if (kratos_option('g_cdn', false)) {
@@ -45,7 +45,11 @@ function theme_autoload()
         if (kratos_option('g_fontawesome', false)) {
             wp_enqueue_style('fontawesome', ASSET_PATH . '/assets/css/fontawesome.min.css', array(), '5.15.2');
         }
-        wp_enqueue_style('kratos', ASSET_PATH . '/assets/css/kratos.min.css', array(), THEME_VERSION);
+        if (kratos_option('g_cdn', false) && !is_child_theme()) {
+            wp_enqueue_style('kratos', 'https://cdn.jsdelivr.net/gh/vtrois/kratos@' . THEME_VERSION . '/style.css' , array(), THEME_VERSION);
+        } else {
+            wp_enqueue_style('kratos', get_stylesheet_uri(), array(), THEME_VERSION);
+        }
         if (kratos_option('g_adminbar', true)) {
             $admin_bar_css = "
             @media screen and (min-width: 782px) {
@@ -67,14 +71,17 @@ function theme_autoload()
                 wp_add_inline_style('kratos', $admin_bar_css);
             }
         }
-        wp_enqueue_style('custom', get_template_directory_uri() . '/custom/custom.css', array(), THEME_VERSION);
+        if (kratos_option('g_sticky', false)) {
+            $sticky_css = ".sticky-sidebar{position: sticky;top: 25px;height:100%}";
+            wp_add_inline_style('kratos', $sticky_css);
+        }
         // js
         wp_deregister_script('jquery');
         wp_enqueue_script('jquery', ASSET_PATH . '/assets/js/jquery.min.js', array(), '3.4.1', false);
         wp_enqueue_script('bootstrap-bundle', ASSET_PATH . '/assets/js/bootstrap.bundle.min.js', array(), '4.5.0', true);
         wp_enqueue_script('layer', ASSET_PATH . '/assets/js/layer.min.js', array(), '3.1.1', true);
-        wp_enqueue_script('kratos', ASSET_PATH . '/assets/js/kratos.min.js', array(), THEME_VERSION, true);
-        wp_enqueue_script('custom', get_template_directory_uri() . '/custom/custom.js', array(), THEME_VERSION, true);
+        wp_enqueue_script('dplayer', ASSET_PATH . '/assets/js/DPlayer.min.js', array(), THEME_VERSION, true);
+        wp_enqueue_script('kratos', ASSET_PATH . '/assets/js/kratos.js', array(), THEME_VERSION, true);
 
         $data = array(
             'site' => home_url(),
@@ -84,7 +91,7 @@ function theme_autoload()
             'repeat' => __('您已经赞过了', 'kratos'),
             'thanks' => __('感谢您的支持', 'kratos'),
             'donate' => __('打赏作者', 'kratos'),
-            'scan' => __('扫码支付', 'kratos'),
+            'scan'   => __('扫码支付', 'kratos'),
         );
         wp_localize_script('kratos', 'kratos', $data);
     }
@@ -199,17 +206,18 @@ if (kratos_option('g_removeimgsize', false)) {
         unset($sizes['thumbnail']);
         unset($sizes['medium']);
         unset($sizes['large']);
+        unset($sizes['full']);
         unset($sizes['medium_large']);
         unset($sizes['1536x1536']);
         unset($sizes['2048x2048']);
         return $sizes;
     }
     add_filter('intermediate_image_sizes_advanced', 'remove_default_images');
-    // add_filter('big_image_size_threshold', '__return_false');
-
+    
     remove_image_size('1536x1536');
     remove_image_size('2048x2048');
 }
+add_filter('big_image_size_threshold', '__return_false');
 
 // 媒体文件使用 md5 值重命名，指定文件前缀
 add_filter('wp_handle_sideload_prefilter', 'custom_upload_perfilter');

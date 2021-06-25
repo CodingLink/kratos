@@ -1,9 +1,9 @@
 <?php
 /**
  * 文章内容
- * @author Seaton Jiang <seaton@vtrois.com>
+ * @author Seaton Jiang <seatonjiang@vtrois.com>
  * @license MIT License
- * @version 2021.01.06
+ * @version 2021.06.25
  */
 
 get_header();
@@ -125,9 +125,7 @@ $select_col = $col_array[kratos_option('g_article_widgets', 'two_side')];
                                 <?php if ( get_the_tags() ) { the_tags('', ' ', ''); } else{ echo '<a>' . __( '暂无' , 'kratos') . '</a>';  }?>
                             </div>
                             <div class="tool float-right d-none d-lg-block">
-                                <div data-toggle="tooltip" data-html="true" data-original-title="<?php _e('最后更新：','kratos'); the_modified_date() ?>">
-                                    <span><?php _e('最后更新：','kratos'); ?><?php the_modified_date(); ?></span>
-                                </div>
+                                <span><?php _e('最后更新：','kratos'); ?><?php the_modified_date(); ?></span>
                             </div>
                         </div>
                     </div>
@@ -147,8 +145,8 @@ $select_col = $col_array[kratos_option('g_article_widgets', 'two_side')];
                 <?php comments_template(); ?>
             </div>
             <?php if (kratos_option('g_article_widgets', 'two_side') == 'two_side'){ ?>
-            <div class="col-lg-4 sidebar d-none d-lg-block">
-                <?php dynamic_sidebar('sidebar_tool'); ?>
+            <div class="col-lg-4 sidebar sticky-sidebar d-none d-lg-block">
+                <?php dynamic_sidebar('sidebar_tool'); if (kratos_option('g_post_toc', true)) echo article_toc(); ?>
             </div>
             <?php } ?>
         </div>

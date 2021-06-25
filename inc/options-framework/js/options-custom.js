@@ -44,6 +44,24 @@ jQuery(document).ready(function ($) {
     jQuery("#section-g_cos_secretkey").show();
   }
 
+  jQuery("#g_imgx").click(function () {
+    jQuery("#section-g_imgx_serviceid").fadeToggle(400);
+    jQuery("#section-g_imgx_region").fadeToggle(400);
+    jQuery("#section-g_imgx_url").fadeToggle(400);
+    jQuery("#section-g_imgx_tmp").fadeToggle(400);
+    jQuery("#section-g_imgx_accesskey").fadeToggle(400);
+    jQuery("#section-g_imgx_secretkey").fadeToggle(400);
+  });
+
+  if (jQuery("#g_imgx:checked").val() !== undefined) {
+    jQuery("#section-g_imgx_serviceid").show();
+    jQuery("#section-g_imgx_region").show();
+    jQuery("#section-g_imgx_url").show();
+    jQuery("#section-g_imgx_tmp").show();
+    jQuery("#section-g_imgx_accesskey").show();
+    jQuery("#section-g_imgx_secretkey").show();
+  }
+
   jQuery("#g_007").click(function () {
     jQuery("#section-g_007_appid").fadeToggle(400);
     jQuery("#section-g_007_appsecretkey").fadeToggle(400);
@@ -92,10 +110,12 @@ jQuery(document).ready(function ($) {
 
   jQuery("#g_thumbnail").click(function () {
     jQuery("#section-g_postthumbnail").fadeToggle(400);
+    jQuery("#section-essay_feature_img_usable").fadeToggle(400);
   });
 
   if (jQuery("#g_thumbnail:checked").val() !== undefined) {
     jQuery("#section-g_postthumbnail").show();
+    jQuery("#section-essay_feature_img_usable").show();
   }
 
   jQuery("#top_select").change(function () {

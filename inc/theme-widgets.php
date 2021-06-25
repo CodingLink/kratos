@@ -1,9 +1,9 @@
 <?php
 /**
  * 侧栏小工具
- * @author Seaton Jiang <seaton@vtrois.com>
+ * @author Seaton Jiang <seatonjiang@vtrois.com>
  * @license MIT License
- * @version 2021.03.10
+ * @version 2021.06.25
  */
 
 // 添加小工具
@@ -22,7 +22,6 @@ function widgets_init()
         'WP_Widget_Pages',
         'WP_Widget_Meta',
         'WP_Widget_Media_Image',
-        'WP_Widget_Archives',
         'WP_Widget_Calendar',
         'WP_Widget_Recent_Posts',
         'WP_Widget_Recent_Comments',
@@ -38,6 +37,22 @@ function widgets_init()
 }
 add_action('widgets_init', 'widgets_init');
 
+// 分类目录计数
+function cat_count_span( $links ) {
+    $links = str_replace( '</a> (', '<span> / ', $links );
+    $links = str_replace( ')', __('篇', 'kratos') . '</span></a>', $links );
+    return $links;
+}
+add_filter( 'wp_list_categories', 'cat_count_span' );
+
+// 文章归档计数
+function archive_count_span( $links ) {
+    $links = str_replace( '</a>&nbsp;(', '<span> / ', $links );
+    $links = str_replace( ')', __('篇', 'kratos') . '</span></a>', $links );
+    return $links;
+}
+add_filter( 'get_archives_link', 'archive_count_span' );
+
 // 小工具文章聚合 - 热点文章
 function most_comm_posts($days = 30, $nums = 6)
 {
@@ -45,16 +60,16 @@ function most_comm_posts($days = 30, $nums = 6)
     date_default_timezone_set("PRC");
     $today = date("Y-m-d H:i:s");
     $daysago = date("Y-m-d H:i:s", strtotime($today) - ($days * 24 * 60 * 60));
-    $result = $wpdb->get_results("SELECT comment_count, ID, post_title, post_date FROM $wpdb->posts WHERE post_date BETWEEN '$daysago' AND '$today' and post_type='post' and post_status='publish' ORDER BY comment_count DESC LIMIT 0 , $nums");
+    $result = $wpdb->get_results($wpdb->prepare("SELECT comment_count, ID, post_title, post_date FROM $wpdb->posts WHERE post_date BETWEEN %s AND %s and post_type = 'post' AND post_status = 'publish' ORDER BY comment_count DESC LIMIT 0, %d", $daysago, $today, $nums));
     $output = '';
     if (!empty($result)) {
         foreach ($result as $topten) {
             $postid = $topten->ID;
-            $title = $topten->post_title;
+            $title = esc_attr(strip_tags($topten->post_title));
             $commentcount = $topten->comment_count;
             if ($commentcount >= 0) {
                 $output .= '<a class="bookmark-item" title="' . $title . '" href="' . get_permalink($postid) . '" rel="bookmark"><i class="kicon i-book"></i>';
-                $output .= strip_tags($title);
+                $output .= $title;
                 $output .= '</a>';
             }
         }
@@ -109,10 +124,11 @@ function string_cut($string, $sublen, $start = 0, $code = 'UTF-8') {
 
 function latest_comments($list_number=5, $cut_length=50)
 {
-    global $wpdb,$output;
-    $comments = $wpdb->get_results("SELECT DISTINCT ID, post_title, post_password, comment_ID, comment_post_ID, comment_author, comment_date_gmt, comment_approved, comment_type, comment_author_url, comment_author_email, comment_content AS com_excerpt FROM $wpdb->comments LEFT OUTER JOIN $wpdb->posts ON ($wpdb->comments.comment_post_ID = $wpdb->posts.ID) WHERE comment_approved = '1' AND (comment_type = '' OR comment_type = 'comment') AND user_id != '1' AND post_password = '' ORDER BY comment_date_gmt DESC LIMIT $list_number");
+    global $wpdb, $output;
+    $comments = $wpdb->get_results($wpdb->prepare("SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_date_gmt, comment_content FROM {$wpdb->comments} LEFT OUTER JOIN {$wpdb->posts} ON {$wpdb->comments}.comment_post_ID = {$wpdb->posts}.ID WHERE comment_approved = '1' AND (comment_type = '' OR comment_type = 'comment') AND user_id != '1' AND post_password = '' ORDER BY comment_date_gmt DESC LIMIT %d", $list_number));
     foreach ($comments as $comment) {
-        $output .= ' <a href="'.get_the_permalink($comment->comment_post_ID) .'#commentform"> <div class="meta clearfix"> <div class="avatar float-left">'.get_avatar( $comment, 60 ).'</div> <div class="profile d-block"> <span class="date"> '.__( '发布于 ' , 'kratos').timeago($comment->comment_date_gmt).'</span> <span class="message d-block">'.convert_smilies(string_cut(strip_tags($comment->com_excerpt), $cut_length)).'</span> </div> </div> </a>';
+        $nickname = esc_attr($comment->comment_author) ?: __('匿名', 'kratos');
+        $output .= '<a href="' . get_the_permalink($comment->comment_post_ID) . '#commentform"> <div class="meta clearfix"> <div class="avatar float-left">' . get_avatar($comment, 60) . '</div> <div class="profile d-block"> <span class="date">' . $nickname . ' ' . __('发布于 ', 'kratos') . timeago($comment->comment_date_gmt) . '</span> <span class="message d-block">' . convert_smilies(esc_attr(string_cut(strip_tags($comment->comment_content), $cut_length))) . '</span> </div> </div> </a>';
     }
     return $output;
 }
@@ -395,17 +411,17 @@ class widget_posts extends WP_Widget
             <a class="nav-item nav-link <?php echo $active = ($order == 'random') ? 'active' : null; ?>" id="nav-random-tab" data-toggle="tab" href="#nav-random" role="tab" aria-controls="nav-random" aria-selected="<?php echo $selected = ($order == 'random') ? 'true' : 'false'; ?>"><?php _e('随机', 'kratos');?></a>
         </div>
         <div class="tab-content" id="nav-tabContent">
-            <div class="tab-pane fade" id="nav-new" role="tabpanel" aria-labelledby="nav-new-tab">
+            <div class="tab-pane fade <?php echo $active = ($order == 'new') ? 'show active' : null; ?>" id="nav-new" role="tabpanel" aria-labelledby="nav-new-tab">
             <?php $myposts = get_posts('numberposts=' . $number . ' & offset=0');foreach ($myposts as $post): ?>
-                <a class="bookmark-item" title="<?php echo $post->post_title; ?>" href="<?php echo get_permalink($post->ID); ?>" rel="bookmark"><i class="kicon i-book"></i><?php echo strip_tags($post->post_title) ?></a>
+                <a class="bookmark-item" rel="bookmark" title="<?php echo esc_attr(strip_tags($post->post_title)); ?>" href="<?php echo get_permalink($post->ID); ?>"><i class="kicon i-book"></i><?php echo esc_attr(strip_tags($post->post_title)); ?></a>
             <?php endforeach;?>
             </div>
-            <div class="tab-pane fade show active" id="nav-hot" role="tabpanel" aria-labelledby="nav-hot-tab">
+            <div class="tab-pane fade <?php echo $active = ($order == 'hot') ? 'show active' : null; ?>" id="nav-hot" role="tabpanel" aria-labelledby="nav-hot-tab">
             <?php if (function_exists('most_comm_posts')) {most_comm_posts($days, $number);}?>
             </div>
-            <div class="tab-pane fade" id="nav-random" role="tabpanel" aria-labelledby="nav-random-tab">
+            <div class="tab-pane fade <?php echo $active = ($order == 'random') ? 'show active' : null; ?>" id="nav-random" role="tabpanel" aria-labelledby="nav-random-tab">
             <?php $myposts = get_posts('numberposts=' . $number . ' & offset=0 & orderby=rand');foreach ($myposts as $post): ?>
-                <a class="bookmark-item" title="<?php echo $post->post_title; ?>" href="<?php echo get_permalink($post->ID); ?>" rel="bookmark"><i class="kicon i-book"></i><?php echo strip_tags($post->post_title) ?></a>
+                <a class="bookmark-item" rel="bookmark" title="<?php echo esc_attr(strip_tags($post->post_title)); ?>" href="<?php echo get_permalink($post->ID); ?>"><i class="kicon i-book"></i><?php echo esc_attr(strip_tags($post->post_title)); ?></a>
             <?php endforeach;?>
             </div>
         </div>

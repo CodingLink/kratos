@@ -116,7 +116,7 @@ class Options_Framework_Admin {
 		if ( $this->options_screen != $hook )
 	        return;
 
-		wp_enqueue_style( 'optionsframework', get_stylesheet_directory_uri() . '/inc/options-framework/css/optionsframework.css', array(),  Options_Framework::VERSION );
+		wp_enqueue_style( 'optionsframework', 'https://cdn.jsdelivr.net/gh/vtrois/kratos@' . THEME_VERSION . '/inc/options-framework/css/optionsframework.css', array(),  Options_Framework::VERSION );
 		wp_enqueue_style( 'wp-color-picker' );
 	}
 
@@ -133,7 +133,7 @@ class Options_Framework_Admin {
 		// Enqueue custom option panel JS
 		wp_enqueue_script(
 			'options-custom',
-			get_stylesheet_directory_uri() . '/inc/options-framework/js/options-custom.js',
+			'https://cdn.jsdelivr.net/gh/vtrois/kratos@' . THEME_VERSION . '/inc/options-framework/js/options-custom.js',
 			array( 'jquery','wp-color-picker' ),
 			Options_Framework::VERSION
 		);
@@ -174,7 +174,7 @@ class Options_Framework_Admin {
 
 	    <div id="optionsframework-metabox" class="metabox-holder">
 		    <div id="optionsframework" class="postbox">
-				<form action="options.php" method="post">
+				<form action="options.php" method="post" onkeydown="if(event.keyCode==13){return false;}">
 				<?php settings_fields( 'optionsframework' ); ?>
 				<?php Options_Framework_Interface::optionsframework_fields(); /* Settings */ ?>
 				<div id="optionsframework-submit">
