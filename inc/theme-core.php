@@ -182,6 +182,12 @@ add_filter('style_loader_src', function ($href) {
 // 替换国内 Gravatar 源
 function get_https_avatar($avatar)
 {
+    if (kratos_option('g_gravatar', false)) {
+        $cdn = "sdn.geekzu.org";
+    } else {
+        $cdn = "cn.gravatar.com";
+    }
+
     $avatar = str_replace(array("www.gravatar.com", "0.gravatar.com", "1.gravatar.com", "2.gravatar.com", "3.gravatar.com", "secure.gravatar.com"), kratos_option('g_gravatar', 'sdn.geekzu.org') ?: "secure.gravatar.com", $avatar);
     $avatar = str_replace("http://", "https://", $avatar);
     return $avatar;
